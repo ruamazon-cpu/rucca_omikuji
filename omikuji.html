@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>本日の占い</title>
+  <style>
+    /* 全体の設定 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Yu Gothic', 'Hiragino Kaku Gothic ProN', sans-serif;
+      padding: 20px;
+    }
+
+    /* スマホ本体 */
+    .smartphone {
+      width: 375px;
+      height: 812px;
+      background: #1a1a1a;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 0 2px #2a2a2a,
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      position: relative;
+      animation: floatIn 1s ease-out;
+    }
+
+    @keyframes floatIn {
+      from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* スマホ画面 */
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #fff5f5 0%, #ffe8e8 100%);
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ステータスバー */
+    .status-bar {
+      height: 44px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* アプリヘッダー */
+    .app-header {
+      background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+      padding: 20px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+    }
+
+    .app-header h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .date {
+      font-size: 14px;
+      opacity: 0.95;
+      font-weight: normal;
+    }
+
+    /* コンテンツエリア */
+    .content {
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+
+    /* 結果表示エリア */
+    #result {
+      width: 280px;
+      height: 280px;
+      background: white;
+      border: 6px solid #ff0000;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #999;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 
+        0 10px 30px rgba(255, 0, 0, 0.2),
+        inset 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #result::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transform: rotate(45deg);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+      }
+      100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+      }
+    }
+
+    /* 結果が出た時のスタイル */
+    #result.show-result {
+      font-size: 72px;
+      color: #ff0000;
+      background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%);
+      border-color: #cc0000;
+      border-width: 8px;
+      animation: resultPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 
+        0 15px 40px rgba(255, 0, 0, 0.4),
+        inset 0 2px 10px rgba(255, 0, 0, 0.1);
+    }
+
+    @keyframes resultPop {
+      0% {
+        transform: scale(0.3) rotate(-15deg);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.15) rotate(5deg);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    /* ボタン */
+    button {
+      padding: 18px 50px;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 
+        0 8px 20px rgba(255, 0, 0, 0.4),
+        0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .button-icon {
+      font-size: 24px;
+      animation: rotate 2s linear infinite;
+    }
+
+    @keyframes rotate {
+      0%, 90% {
+        transform: rotate(0deg);
+      }
+      95% {
+        transform: rotate(15deg);
+      }
+      100% {
+        transform: rotate(0deg);
+      }
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    button:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 
+        0 12px 30px rgba(255, 0, 0, 0.5),
+        0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    button:hover::before {
+      width: 400px;
+      height: 400px;
+    }
+
+    button:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 
+        0 4px 15px rgba(255, 0, 0, 0.3),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ヒントテキスト */
+    .hint {
+      color: #ff0000;
+      font-size: 16px;
+      font-weight: bold;
+      animation: bounce 2s infinite;
+      text-shadow: 1px 1px 2px rgba(255, 0, 0, 0.2);
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+
+    /* ホームボタン */
+    .home-button {
+      width: 140px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 425px) {
+      .smartphone {
+        width: 100%;
+        height: 100vh;
+        max-height: 812px;
+        border-radius: 0;
+      }
+      
+      .screen {
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="smartphone">
+    <div class="screen">
+      <div class="status-bar">
+        <span class="time">12:34</span>
+        <span class="icons">📶 📡 🔋</span>
+      </div>
+      
+      <div class="app-header">
+        <h1>✨本日の運勢占い✨</h1>
+        <p class="date" id="today-date"></p>
+      </div>
+      
+      <div class="content">
+        <div id="result">今日の運勢はコチラ</div>
+        <button onclick="drawOmikuji()">
+          <span class="button-icon">🎴</span>
+          おみくじを引く
+        </button>
+        <p class="hint">👆 タップして運勢をチェック！</p>
+      </div>
+    </div>
+    
+    <div class="home-button"></div>
+  </div>
+  
+  <script>
+    // ページ読み込み時に今日の日付を表示
+    window.addEventListener('DOMContentLoaded', function() {
+      const dateElement = document.getElementById('today-date');
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+      const weekday = weekdays[today.getDay()];
+      
+      dateElement.textContent = `${year}年${month}月${day}日（${weekday}）`;
+    });
+
+    // おみくじを引く関数
+    function drawOmikuji() {
+      const list = ['大吉', '中吉', '小吉', '末吉', '凶'];
+      const pick = list[Math.floor(Math.random() * list.length)];
+      const box = document.getElementById('result');
+      
+      // 一旦リセット（アニメーション再生のため）
+      box.classList.remove('show-result');
+      box.textContent = '...';
+      
+      // 少し遅延させて結果を表示（ドキドキ感を演出）
+      setTimeout(function() {
+        box.textContent = pick;
+        box.classList.add('show-result');
+        
+        // 結果に応じて追加エフェクト
+        if (pick === '大吉') {
+          createConfetti();
+        }
+      }, 300);
+    }
+
+    // 大吉の時の紙吹雪エフェクト（オプション）
+    function createConfetti() {
+      const colors = ['#ff0000', '#ff6b6b', '#ffd700', '#ff1493'];
+      const confettiCount = 30;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        setTimeout(function() {
+          const confetti = document.createElement('div');
+          confetti.style.position = 'fixed';
+          confetti.style.width = '10px';
+          confetti.style.height = '10px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-10px';
+          confetti.style.borderRadius = '50%';
+          confetti.style.pointerEvents = 'none';
+          confetti.style.zIndex = '9999';
+          confetti.style.opacity = '0.8';
+          
+          document.body.appendChild(confetti);
+          
+          const duration = 2000 + Math.random() * 1000;
+          const startTime = Date.now();
+          
+          function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = elapsed / duration;
+            
+            if (progress < 1) {
+              confetti.style.top = (progress * 100) + 'vh';
+              confetti.style.transform = `rotate(${progress * 720}deg)`;
+              confetti.style.opacity = 0.8 - progress * 0.8;
+              requestAnimationFrame(animate);
+            } else {
+              confetti.remove();
+            }
+          }
+          
+          animate();
+        }, i * 50);
+      }
+    }
+  </script>
+</body>
+</html>
